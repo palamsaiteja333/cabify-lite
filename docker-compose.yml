@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: cabify-postgres
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - cabify_pgdata:/var/lib/postgresql/data
+
+    networks:
+      - cabify-net
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+
+networks:
+  cabify-net:
+    name: cabify-net
+
+
+volumes:
+  cabify_pgdata:
+    external: true
+    name: cabify_pgdata
