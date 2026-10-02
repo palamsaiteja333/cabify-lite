@@ -1,4 +1,23 @@
 services:
+  rides-api:
+    build:
+      context: ./rides-api
+      dockerfile: Dockerfile
+    container_name: cabify-rides-api
+
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - cabify-net
+
   postgres:
     image: postgres:16
     container_name: cabify-postgres
