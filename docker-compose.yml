@@ -51,5 +51,3 @@ networks:
 
 volumes:
   cabify_pgdata:
-    external: true
-    name: cabify_pgdata

@@ -3,10 +3,7 @@ import os
 import psycopg
 
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://cabify:cabify123@localhost:5432/cabify"
-)
+DATABASE_URL = os.environ["DATABASE_URL"]
 
 
 def get_connection():
