@@ -1,4 +1,45 @@
 services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cabify-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      rides-api:
+        condition: service_started
+    networks:
+      - cabify-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cabify-grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      tempo:
+        condition: service_started
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - cabify-net
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: cabify-tempo
+    command:
+      - "-config.file=/etc/tempo/tempo.yaml"
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo_data:/data/tempo
+    ports:
+      - "3200:3200"
+    networks:
+      - cabify-net
+
   rides-api:
     build:
       context: ./rides-api
@@ -7,19 +48,37 @@ services:
 
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
 
     ports:
       - "8000:8000"
 
     depends_on:
-      postgres:
-        condition: service_healthy
+      # postgres:
+      #   condition: service_healthy
+      otel-collector:
+        condition: service_started
 
     networks:
       - cabify-net
 
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD",
+    #       "python",
+    #       "-c",
+    #       "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+    #     ]
+    #   interval: 5s
+    #   timeout: 3s
+    #   retries: 5
+    #   start_period: 5s
+
+
   postgres:
     image: postgres:16
+
     container_name: cabify-postgres
 
     environment:
@@ -36,13 +95,27 @@ services:
     networks:
       - cabify-net
 
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD-SHELL",
+    #       "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+    #     ]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 5
+    #   start_period: 5s
 
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: cabify-otel-collector
+    command:
+      - "--config=/etc/otelcol-contrib/config.yaml"
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    networks:
+      - cabify-net
 
 networks:
   cabify-net:
@@ -51,3 +124,5 @@ networks:
 
 volumes:
   cabify_pgdata:
+  tempo_data:
+  grafana_data:

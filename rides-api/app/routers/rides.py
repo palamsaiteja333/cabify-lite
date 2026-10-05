@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
-
 from app.db import create_ride, get_ride_by_id
+from app.metrics import RIDES_CREATED
 from app.models import RideCreate, RideResponse
 
 
@@ -16,10 +16,15 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED
 )
 def create_ride_endpoint(ride: RideCreate):
-    return create_ride(
+    created_ride = create_ride(
         pickup=ride.pickup,
         destination=ride.destination
     )
+
+    RIDES_CREATED.inc()
+
+    return created_ride
+
 
 @router.get(
     "/{ride_id}",

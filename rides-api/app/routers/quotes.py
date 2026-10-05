@@ -2,6 +2,9 @@ import asyncio
 import random
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
 
 
 router = APIRouter(
@@ -24,14 +27,27 @@ async def get_quote(
     from_: str = Query(alias="from"),
     to: str = Query()
 ):
+    # if random.random() < 0.20:
+    #     delay_seconds = random.uniform(0, 2)
+    #     await asyncio.sleep(delay_seconds)
+
     if random.random() < 0.20:
         delay_seconds = random.uniform(0, 2)
-        await asyncio.sleep(delay_seconds)
+        with tracer.start_as_current_span("simulate_pricing_delay") as span:
+            span.set_attribute("delay.seconds", delay_seconds)
+            await asyncio.sleep(delay_seconds)
 
-    price = round(
-        10 + len(from_) * 0.75 + len(to) * 0.75,
-        2
-    )
+    with tracer.start_as_current_span("calculate_quote_price") as span:
+        price = round(10 + len(from_) * 0.75 + len(to) * 0.75, 2)
+        span.set_attribute("quote.price", price)
+
+    # price = round(
+    #     10 + len(from_) * 0.75 + len(to) * 0.75,
+    #     2
+    # )
+
+    span.set_attribute("quote.price", price)
+    span.set_attribute("quote.price", price)
 
     return {
         "pickup": from_,
