@@ -10,14 +10,22 @@ processors:
 exporters:
   debug:
     verbosity: detailed
+
   otlp/tempo:
     endpoint: tempo:4317
     tls:
       insecure: true
+
+  otlp_http/trace-ingest:
+    endpoint: http://trace-ingest:8001
+    compression: none
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, otlp/tempo]
+      exporters:
+        - debug
+        - otlp/tempo
+        - otlp_http/trace-ingest

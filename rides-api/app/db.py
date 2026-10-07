@@ -66,3 +66,9 @@ def create_ride(pickup: str, destination: str):
         "pickup": pickup,
         "destination": destination
     }
+
+def get_ride_count() -> int:
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM rides")
+            return cursor.fetchone()[0]
