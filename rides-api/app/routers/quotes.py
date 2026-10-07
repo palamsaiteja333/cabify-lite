@@ -3,7 +3,6 @@ import random
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from opentelemetry import trace
-
 from app.db import get_ride_count
 
 
