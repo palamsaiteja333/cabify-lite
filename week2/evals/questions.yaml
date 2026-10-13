@@ -1,0 +1,205 @@
+# Cabify-Lite RAG evaluation set
+# ---------------------------------------------------------------------------
+# 20 questions: 8 policy, 6 data, 4 hybrid, 2 unanswerable.
+#
+# READ THIS BEFORE YOU TOUCH IT:
+#   This file is the contract. It was written against the corpus and the seeded
+#   database BEFORE any retrieval tuning, and that ordering is the whole point.
+#   If you edit a question because your system gets it wrong, you have stopped
+#   evaluating and started cheating. Edit it only if the question itself is
+#   genuinely ambiguous or factually wrong about the source material.
+#
+# Every `expected_sql_result` below is reproducible from `make seed` with the
+# fixed random seed. If you re-seed with a different seed or a different anchor
+# date, these numbers change and this file must be regenerated.
+#
+# Scoring:
+#   retrieval_hit  -> did `expected_source` appear in the cited chunks?  (scored separately)
+#   answer_correct -> does the answer contain `expected_answer_contains`
+#                     and, where present, `expected_sql_result`?
+#   abstained      -> for type `unanswerable`, did the system decline to answer?
+#
+# Retrieval hit-rate and answer correctness are DIFFERENT NUMBERS. Report both.
+# A system that retrieves perfectly and answers badly needs prompt work; one
+# that answers well on bad retrieval is guessing and will fail on the next
+# question. You cannot see either failure from a single blended score.
+#
+# seed: 20260101   anchor_date: 2026-10-05   window: 90 days
+# ---------------------------------------------------------------------------
+
+version: 1
+seed: 20260101
+anchor_date: "2026-10-05"
+
+questions:
+
+  # ---------------------------------------------------------------- policy --
+  - id: p01
+    type: policy
+    question: "If a driver has already accepted my booking, how long do I have to cancel without being charged?"
+    expected_answer_contains: ["2 minutes"]
+    expected_source: refunds_and_cancellations.md
+    notes: "Grace period runs from driver acceptance, not from booking."
+
+  - id: p02
+    type: policy
+    question: "What is the no-show fee, and how long does a driver have to wait at a standard pickup before charging it?"
+    expected_answer_contains: ["60", "5 minutes"]
+    expected_source: no_show_policy.md
+
+  - id: p03
+    type: policy
+    question: "Am I charged anything if the driver cancels the ride?"
+    expected_answer_contains: ["not charged", "no"]
+    expected_source: refunds_and_cancellations.md
+    notes: "Accept either phrasing. Bonus if it mentions the Rs.50 goodwill credit when the driver cancels after arriving."
+
+  - id: p04
+    type: policy
+    question: "What is the surge multiplier for Band C, and which parts of the fare does surge apply to?"
+    expected_answer_contains: ["1.6", "per-km", "per-minute"]
+    expected_source: pricing_sheet.pdf
+    notes: >
+      CHUNKING TRAP. The band labels and the multiplier column live in the same
+      table. Fixed-size chunking that splits this table returns the band names
+      without the numbers, or the numbers without the labels, and the model
+      confidently fills the gap. A correct answer must also exclude the base
+      fare and the minimum fare from surge.
+
+  - id: p05
+    type: policy
+    question: "At an airport pickup, what do I pay per minute once the free waiting time runs out, and is it capped?"
+    expected_answer_contains: ["2.00", "120"]
+    expected_source: pricing_sheet.pdf
+    notes: "CHUNKING TRAP. The waiting-charge table straddles the page break in the PDF."
+
+  - id: p06
+    type: policy
+    question: "What is the maximum cancellation rate a driver is allowed before action is taken?"
+    expected_answer_contains: ["8%"]
+    expected_source: driver_handbook.md
+    notes: "Rolling 30-day window. A good answer gives the escalation ladder too."
+
+  - id: p07
+    type: policy
+    question: "How long do I have to contest a no-show charge?"
+    expected_answer_contains: ["48 hours"]
+    expected_source: no_show_policy.md
+
+  - id: p08
+    type: policy
+    question: "What percentage of the fare does a driver keep, and when are drivers paid?"
+    expected_answer_contains: ["80%", "weekly"]
+    expected_source: driver_handbook.md
+    notes: "Tuesday settlement for the week ending the previous Sunday."
+
+  # ------------------------------------------------------------------ data --
+  - id: d01
+    type: data
+    question: "How many no-show charges did we apply in September 2026?"
+    expected_sql_result: 19
+    expected_answer_contains: ["19"]
+
+  - id: d02
+    type: data
+    question: "How many refunds did we issue over the last 90 days, and what did they total?"
+    expected_sql_result: 60
+    expected_answer_contains: ["60", "6029"]
+    notes: "Total INR 6,029.00. Accept 6029 or 6,029.00."
+
+  - id: d03
+    type: data
+    question: "Which week had the highest cancellation rate, and what was it?"
+    expected_sql_result: "2026-W35"
+    expected_answer_contains: ["29.6", "August"]
+    notes: >
+      Week of Monday 24 August 2026: 50 cancellations out of 169 rides = 29.6%.
+      This is the seeded bad-weather week (22-28 August). A good answer names
+      the week; an excellent one notices the spike is weather-shaped rather
+      than a gradual trend.
+
+  - id: d04
+    type: data
+    question: "What is the average fare of a completed ride?"
+    expected_sql_result: 223.29
+    expected_answer_contains: ["223"]
+    notes: "1,506 completed rides. Filtering on status='completed' is the whole question - cancelled rides carry fare 0 and drag the mean down to ~168 if included."
+
+  - id: d05
+    type: data
+    question: "How many rides did drivers cancel in the last 30 days?"
+    expected_sql_result: 48
+    expected_answer_contains: ["48"]
+
+  - id: d06
+    type: data
+    question: "Which pickup locality generates the most rides?"
+    expected_sql_result: "Whitefield"
+    expected_answer_contains: ["Whitefield"]
+    notes: "118 rides. Kalyan Nagar (116) and Jayanagar (115) are close behind - an answer that presents 118 as a decisive lead is overstating a 2-ride gap."
+
+  # ---------------------------------------------------------------- hybrid --
+  - id: h01
+    type: hybrid
+    question: "What is our no-show policy, and how many no-show charges did we actually apply in September?"
+    expected_answer_contains: ["60", "5 minutes", "19"]
+    expected_source: no_show_policy.md
+    expected_sql_result: 19
+    notes: "The canonical demo question. Must cite the document AND show the query."
+
+  - id: h02
+    type: hybrid
+    question: "Our refunds policy says every refund is issued within 7 days of the ride. Is that what actually happens?"
+    expected_answer_contains: ["7", "no", "not always"]
+    expected_source: refunds_and_cancellations.md
+    expected_sql_result: 7
+    notes: >
+      PLANTED CONTRADICTION. The policy (s.5.1) states no refund is issued more
+      than 7 days after the ride. The database has 7 refunds issued 15-38 days
+      after the ride (refund_ids 12, 21, 22, 26, 45, 47, 59).
+      A passing answer states the policy, states the data, and says they
+      disagree. A failing answer picks one side and presents it as the truth -
+      which is what a system that routes to only one source will do.
+
+  - id: h03
+    type: hybrid
+    question: "The support FAQ says drivers cancel more often than riders. Is that true?"
+    expected_answer_contains: ["no", "riders", "258", "137"]
+    expected_source: support_faq.md
+    expected_sql_result: 258
+    notes: >
+      STALE DOCUMENT TRAP. support_faq.md asserts drivers cancel more. The data
+      says the opposite: 258 rider cancellations vs 137 driver cancellations
+      over 90 days. The FAQ even admits it is not a published figure. Correct
+      behaviour is to contradict the document using the data, and to note the
+      FAQ is a support cheat-sheet last updated March 2025, not a policy.
+
+  - id: h04
+    type: hybrid
+    question: "What is the cancellation fee, and how much have we collected in no-show fees over the last 90 days?"
+    expected_answer_contains: ["30", "4080"]
+    expected_source: refunds_and_cancellations.md
+    expected_sql_result: 4080
+    notes: "Rs.30 cancellation fee (policy); 68 no-shows x Rs.60 = Rs.4,080 (data). Two sources, one answer."
+
+  # ----------------------------------------------------------- unanswerable --
+  - id: u01
+    type: unanswerable
+    question: "Can I bring my dog in a Cabify-Lite?"
+    expected_behaviour: abstain
+    notes: >
+      Nothing in any of the six documents addresses pets or assistance animals.
+      The correct answer is an explicit 'this is not covered in the policy
+      documents I have'. Anything else is a hallucination, and this is the
+      single most important question in the set - a system that invents a
+      confident pet policy will invent a confident refund policy.
+
+  - id: u02
+    type: unanswerable
+    question: "How does corporate billing work for business accounts?"
+    expected_behaviour: abstain
+    notes: >
+      Not covered. The corpus describes UPI, cards and the wallet only. Watch
+      for the model stitching together clause 5.4 (payment methods) and clause
+      5.6 (outstanding balances) into a plausible-sounding corporate billing
+      answer. Plausible and sourced are different things.

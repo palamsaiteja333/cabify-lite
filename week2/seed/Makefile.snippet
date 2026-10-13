@@ -1,0 +1,28 @@
+# Week 2 seeding. Drop these targets into the Makefile at your repo root
+# (adjust the paths if your layout differs).
+#
+#   make seed        wipe and regenerate everything, deterministically
+#   make seed-check  print the numbers to compare against the eval set
+
+SEED_DIR    ?= week2/seed
+DATA_DIR    ?= $(SEED_DIR)/data
+DATABASE_URL ?= postgres://cabify:cabify@localhost:5432/cabify
+
+.PHONY: seed seed-data seed-schema seed-load seed-check
+
+seed: seed-data seed-schema seed-load seed-check
+
+seed-data:
+	python3 $(SEED_DIR)/generate_data.py --anchor 2026-10-05 --outdir $(DATA_DIR)
+
+seed-schema:
+	psql "$(DATABASE_URL)" -f $(SEED_DIR)/schema.sql
+
+seed-load:
+	cd $(SEED_DIR) && psql "$(DATABASE_URL)" -v dir="$(PWD)/$(DATA_DIR)" -f load.sql
+
+seed-check:
+	@psql "$(DATABASE_URL)" -At -c "select 'rides=' || count(*) from rides"
+	@psql "$(DATABASE_URL)" -At -c "select 'refunds=' || count(*) from refunds"
+	@psql "$(DATABASE_URL)" -At -c "select 'avg completed fare=' || round(avg(fare_amount),2) from rides where status='completed'"
+	@psql "$(DATABASE_URL)" -At -c "select 'no_show Sept 2026=' || count(*) from rides where status='no_show' and requested_at >= '2026-09-01' and requested_at < '2026-10-01'"
