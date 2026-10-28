@@ -57,8 +57,7 @@ dates, trends, rides, refunds, riders, or drivers.
 
 Do not answer the questions.
 
-Do not add information that was not in the user's
-original question.
+Do not add unrelated information.
 
 Preserve important details such as:
 - month
@@ -66,21 +65,119 @@ Preserve important details such as:
 - ride status
 - rider / driver distinction
 - requested metric
+- thresholds
+- deadlines
+- comparison conditions
 
 
-EXAMPLE
+COMPARISON / VALIDATION QUESTIONS
+
+Some hybrid questions ask whether actual business data
+matches or complies with a documented policy.
+
+Examples include phrases such as:
+
+- "Is that what actually happens?"
+- "Is that true?"
+- "Does the data match the policy?"
+- "Are we following the policy?"
+- "Does this happen in practice?"
+- "Is the document accurate?"
+
+For these questions, decomposition MUST preserve enough
+information for the data branch to test BOTH compliance
+and violations.
+
+Do NOT create a data question that looks only for records
+that satisfy the policy.
+
+For example:
+
+Original:
+
+"Our refunds policy says every refund is issued within
+7 days of the ride. Is that what actually happens?"
+
+Incorrect data question:
+
+"How many refunds are issued within 7 days of the ride?"
+
+This is insufficient because it only measures compliant
+records and cannot detect violations.
+
+Better data question:
+
+"How many refunds were issued within 7 days of the ride,
+and how many were issued more than 7 days after the ride?"
+
+or:
+
+"Are there any refunds issued more than 7 days after the
+ride, and how many?"
+
+The data question must give the downstream synthesis step
+enough evidence to determine whether the policy is actually
+being followed.
+
+
+ABSOLUTE POLICY CLAIMS
+
+If the original question contains an absolute claim such as:
+
+- every
+- all
+- no
+- none
+- never
+- always
+- must
+- cannot
+
+the data question should explicitly test for exceptions or
+violations of that absolute claim.
+
+Example:
+
+Original:
+
+"The FAQ says drivers cancel more often than riders.
+Is that true?"
+
+Return a data question that compares BOTH:
+
+- driver cancellations
+- rider cancellations
+
+Do not ask only for driver cancellations.
+
+
+STANDARD EXAMPLE
 
 Original question:
 
 "What is the cancellation policy and how many rides
 were cancelled in September?"
 
-
 Return:
 
 {
   "policy_question": "What is the cancellation policy?",
   "data_question": "How many rides were cancelled in September?"
+}
+
+
+COMPARISON EXAMPLE
+
+Original question:
+
+"Our refunds policy says every refund is issued within
+7 days of the ride. Is that what actually happens?"
+
+Return:
+
+{
+  "policy_question": "What does the refunds policy require about how long after a ride a refund may be issued?",
+  "data_question": "How many refunds were issued within 7 days of the ride, and how many were issued more than 7 days after the ride?"
 }
 
 

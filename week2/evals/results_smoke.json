@@ -1,0 +1,1253 @@
+{
+  "run_label": "smoke",
+  "generated_at_utc": "2026-10-23T21:08:34.274968+00:00",
+  "config": {
+    "chunk_size_chars": 1200,
+    "chunk_overlap_chars": 150,
+    "embedding_model": "amazon.titan-embed-text-v2:0",
+    "embedding_dimensions": 1024,
+    "chat_model": "us.amazon.nova-2-lite-v1:0",
+    "vector_store": "PostgreSQL + pgvector",
+    "distance_metric": "cosine",
+    "top_k": 5
+  },
+  "summary": {
+    "top_k": 5,
+    "total_questions": 20,
+    "retrieval_hit_rate": {
+      "correct": 12,
+      "total": 12,
+      "rate": 1.0
+    },
+    "answer_correctness": {
+      "correct": 14,
+      "total": 20,
+      "rate": 0.7
+    },
+    "routing_accuracy": {
+      "correct": 17,
+      "total": 18,
+      "rate": 0.9444444444444444
+    },
+    "abstention_rate": {
+      "correct": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "by_type": {
+      "policy": {
+        "questions": 8,
+        "answer_correctness": {
+          "correct": 8,
+          "total": 8,
+          "rate": 1.0
+        }
+      },
+      "data": {
+        "questions": 6,
+        "answer_correctness": {
+          "correct": 2,
+          "total": 6,
+          "rate": 0.3333333333333333
+        }
+      },
+      "hybrid": {
+        "questions": 4,
+        "answer_correctness": {
+          "correct": 2,
+          "total": 4,
+          "rate": 0.5
+        }
+      },
+      "unanswerable": {
+        "questions": 2,
+        "answer_correctness": {
+          "correct": 2,
+          "total": 2,
+          "rate": 1.0
+        }
+      }
+    },
+    "questions_with_errors": 1
+  },
+  "results": [
+    {
+      "id": "p01",
+      "type": "policy",
+      "question": "If a driver has already accepted my booking, how long do I have to cancel without being charged?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "refunds_and_cancellations.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "If a driver has already accepted my booking, how long do I have to cancel without being charged?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "refunds_and_cancellations.md",
+        "refunds_and_cancellations.md",
+        "refunds_and_cancellations.md",
+        "support_faq.md",
+        "support_faq.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 52,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.1 Before a Driver accepts",
+          "chunk_index": 2,
+          "cosine_distance": 0.25838415274714377,
+          "cosine_similarity": 0.7416158472528562
+        },
+        {
+          "rank": 2,
+          "chunk_id": 56,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "3. Cancellation by the Driver",
+          "chunk_index": 6,
+          "cosine_distance": 0.35371823862573637,
+          "cosine_similarity": 0.6462817613742636
+        },
+        {
+          "rank": 3,
+          "chunk_id": 53,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.2 The free-cancellation grace period",
+          "chunk_index": 3,
+          "cosine_distance": 0.3865456716363821,
+          "cosine_similarity": 0.6134543283636179
+        },
+        {
+          "rank": 4,
+          "chunk_id": 2,
+          "source_file": "support_faq.md",
+          "section_heading": "\"Can I cancel for free?\"",
+          "chunk_index": 1,
+          "cosine_distance": 0.3985224545442303,
+          "cosine_similarity": 0.6014775454557697
+        },
+        {
+          "rank": 5,
+          "chunk_id": 3,
+          "source_file": "support_faq.md",
+          "section_heading": "\"The driver cancelled on me — am I charged?\"",
+          "chunk_index": 2,
+          "cosine_distance": 0.4099420660768698,
+          "cosine_similarity": 0.5900579339231302
+        }
+      ],
+      "expected_answer_contains": [
+        "2 minutes"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "There appears to be a discrepancy in the documented grace periods for free cancellation after a driver accepts a booking. According to refunds_and_cancellations.md, the grace period is 2 minutes. However, support_faq.md states it is 5 minutes. Based on the available context, the answer depends on which document is considered authoritative. The two sources conflict on the length of the free-cancellation grace period.",
+      "confidence": "medium",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly identifies the conflict between two policy documents (2 minutes vs 5 minutes) regarding the free cancellation grace period after a driver accepts a booking. It does not incorrectly choose one side but presents the contradiction as required by the evaluation rules. The answer is consistent with the expected answer requirement to mention '2 minutes' as one of the conflicting positions.",
+      "abstained": null,
+      "notes": "Grace period runs from driver acceptance, not from booking.",
+      "errors": [],
+      "eval_wall_time_ms": 4000.34
+    },
+    {
+      "id": "p02",
+      "type": "policy",
+      "question": "What is the no-show fee, and how long does a driver have to wait at a standard pickup before charging it?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "no_show_policy.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "What is the no-show fee, and how long does a driver have to wait at a standard pickup before charging it?",
+      "retrieval_hit": true,
+      "expected_source_rank": 3,
+      "retrieved_sources": [
+        "support_faq.md",
+        "driver_handbook.md",
+        "no_show_policy.md",
+        "no_show_policy.md",
+        "pricing_sheet.pdf"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 4,
+          "source_file": "support_faq.md",
+          "section_heading": "\"What's the no-show fee?\"",
+          "chunk_index": 3,
+          "cosine_distance": 0.3261726109775769,
+          "cosine_similarity": 0.6738273890224231
+        },
+        {
+          "rank": 2,
+          "chunk_id": 28,
+          "source_file": "driver_handbook.md",
+          "section_heading": "3. At the pickup",
+          "chunk_index": 5,
+          "cosine_distance": 0.34457234474585274,
+          "cosine_similarity": 0.6554276552541473
+        },
+        {
+          "rank": 3,
+          "chunk_id": 42,
+          "source_file": "no_show_policy.md",
+          "section_heading": "3. The charge",
+          "chunk_index": 3,
+          "cosine_distance": 0.3616964601459217,
+          "cosine_similarity": 0.6383035398540783
+        },
+        {
+          "rank": 4,
+          "chunk_id": 41,
+          "source_file": "no_show_policy.md",
+          "section_heading": "2. The waiting period",
+          "chunk_index": 2,
+          "cosine_distance": 0.4429227777811554,
+          "cosine_similarity": 0.5570772222188446
+        },
+        {
+          "rank": 5,
+          "chunk_id": 49,
+          "source_file": "pricing_sheet.pdf",
+          "section_heading": "Page 2",
+          "chunk_index": 3,
+          "cosine_distance": 0.5056385692573437,
+          "cosine_similarity": 0.49436143074265626
+        }
+      ],
+      "expected_answer_contains": [
+        "60",
+        "5 minutes"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "The no-show fee is ₹60. A driver must wait 5 minutes at a standard pickup before charging it. The waiting period begins when the driver marks arrival in the app and is within 100 metres of the pickup point. If the driver ends the booking before the 5-minute waiting period, the no-show charge is not valid and will be reversed.",
+      "confidence": "high",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states the no-show fee is ₹60 and the driver must wait 5 minutes at a standard pickup before charging it, matching the expected answer requirements.",
+      "abstained": null,
+      "notes": "",
+      "errors": [],
+      "eval_wall_time_ms": 11479.19
+    },
+    {
+      "id": "p03",
+      "type": "policy",
+      "question": "Am I charged anything if the driver cancels the ride?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "refunds_and_cancellations.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "Am I charged anything if the driver cancels the ride?",
+      "retrieval_hit": true,
+      "expected_source_rank": 2,
+      "retrieved_sources": [
+        "support_faq.md",
+        "refunds_and_cancellations.md",
+        "refunds_and_cancellations.md",
+        "driver_handbook.md",
+        "refunds_and_cancellations.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 3,
+          "source_file": "support_faq.md",
+          "section_heading": "\"The driver cancelled on me — am I charged?\"",
+          "chunk_index": 2,
+          "cosine_distance": 0.23383115328364512,
+          "cosine_similarity": 0.7661688467163549
+        },
+        {
+          "rank": 2,
+          "chunk_id": 56,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "3. Cancellation by the Driver",
+          "chunk_index": 6,
+          "cosine_distance": 0.30320390424681853,
+          "cosine_similarity": 0.6967960957531815
+        },
+        {
+          "rank": 3,
+          "chunk_id": 54,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.3 After the grace period",
+          "chunk_index": 4,
+          "cosine_distance": 0.31597248816654033,
+          "cosine_similarity": 0.6840275118334597
+        },
+        {
+          "rank": 4,
+          "chunk_id": 33,
+          "source_file": "driver_handbook.md",
+          "section_heading": "5.4 Rider cancellations",
+          "chunk_index": 10,
+          "cosine_distance": 0.32757659821789287,
+          "cosine_similarity": 0.6724234017821071
+        },
+        {
+          "rank": 5,
+          "chunk_id": 52,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.1 Before a Driver accepts",
+          "chunk_index": 2,
+          "cosine_distance": 0.38045296785515625,
+          "cosine_similarity": 0.6195470321448437
+        }
+      ],
+      "expected_answer_contains": [
+        "not charged",
+        "no"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "No, you are never charged if the driver cancels the ride. If there is a pre-authorization hold on your payment method, it will be released automatically. If you were present at the pickup point when the driver cancelled, you can request a goodwill credit of ₹50 to your Cabify-Lite wallet.",
+      "confidence": "high",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states that the user is not charged when the driver cancels the ride, which matches the expected answer requirement. It also includes the bonus detail about the ₹50 goodwill credit when the driver cancels after arriving at the pickup point, fulfilling all expectations.",
+      "abstained": null,
+      "notes": "Accept either phrasing. Bonus if it mentions the Rs.50 goodwill credit when the driver cancels after arriving.",
+      "errors": [],
+      "eval_wall_time_ms": 2666.87
+    },
+    {
+      "id": "p04",
+      "type": "policy",
+      "question": "What is the surge multiplier for Band C, and which parts of the fare does surge apply to?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "pricing_sheet.pdf",
+      "retrieval_applicable": true,
+      "retrieval_question": "What is the surge multiplier for Band C, and which parts of the fare does surge apply to?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "pricing_sheet.pdf",
+        "pricing_sheet.pdf",
+        "terms_and_conditions.md",
+        "support_faq.md",
+        "refunds_and_cancellations.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 48,
+          "source_file": "pricing_sheet.pdf",
+          "section_heading": "Page 1",
+          "chunk_index": 2,
+          "cosine_distance": 0.5597624683167755,
+          "cosine_similarity": 0.44023753168322455
+        },
+        {
+          "rank": 2,
+          "chunk_id": 47,
+          "source_file": "pricing_sheet.pdf",
+          "section_heading": "Page 1",
+          "chunk_index": 1,
+          "cosine_distance": 0.5732006728649108,
+          "cosine_similarity": 0.42679932713508917
+        },
+        {
+          "rank": 3,
+          "chunk_id": 81,
+          "source_file": "terms_and_conditions.md",
+          "section_heading": "5. Fares and payment",
+          "chunk_index": 6,
+          "cosine_distance": 0.6697644990542226,
+          "cosine_similarity": 0.33023550094577736
+        },
+        {
+          "rank": 4,
+          "chunk_id": 6,
+          "source_file": "support_faq.md",
+          "section_heading": "\"Why was my fare higher than the estimate?\"",
+          "chunk_index": 5,
+          "cosine_distance": 0.6836750428289227,
+          "cosine_similarity": 0.31632495717107734
+        },
+        {
+          "rank": 5,
+          "chunk_id": 59,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "4.2 What is not refundable",
+          "chunk_index": 9,
+          "cosine_distance": 0.7242061331394986,
+          "cosine_similarity": 0.27579386686050145
+        }
+      ],
+      "expected_answer_contains": [
+        "1.6",
+        "per-km",
+        "per-minute"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "The surge multiplier for Band C is 1.6x. Surge applies to the per-kilometre and per-minute components of the fare.",
+      "confidence": "high",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states the surge multiplier for Band C as 1.6x and accurately identifies that surge applies only to the per-kilometre and per-minute components, excluding base fare and minimum fare as required by the policy. All expected elements (1.6, per-km, per-minute) are present and correctly contextualized.",
+      "abstained": null,
+      "notes": "CHUNKING TRAP. The band labels and the multiplier column live in the same table. Fixed-size chunking that splits this table returns the band names without the numbers, or the numbers without the labels, and the model confidently fills the gap. A correct answer must also exclude the base fare and the minimum fare from surge.\n",
+      "errors": [],
+      "eval_wall_time_ms": 2764.31
+    },
+    {
+      "id": "p05",
+      "type": "policy",
+      "question": "At an airport pickup, what do I pay per minute once the free waiting time runs out, and is it capped?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "pricing_sheet.pdf",
+      "retrieval_applicable": true,
+      "retrieval_question": "At an airport pickup, what do I pay per minute once the free waiting time runs out, and is it capped?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "pricing_sheet.pdf",
+        "no_show_policy.md",
+        "pricing_sheet.pdf",
+        "pricing_sheet.pdf",
+        "driver_handbook.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 49,
+          "source_file": "pricing_sheet.pdf",
+          "section_heading": "Page 2",
+          "chunk_index": 3,
+          "cosine_distance": 0.48093128204345703,
+          "cosine_similarity": 0.519068717956543
+        },
+        {
+          "rank": 2,
+          "chunk_id": 41,
+          "source_file": "no_show_policy.md",
+          "section_heading": "2. The waiting period",
+          "chunk_index": 2,
+          "cosine_distance": 0.562298264366491,
+          "cosine_similarity": 0.437701735633509
+        },
+        {
+          "rank": 3,
+          "chunk_id": 48,
+          "source_file": "pricing_sheet.pdf",
+          "section_heading": "Page 1",
+          "chunk_index": 2,
+          "cosine_distance": 0.6131402436834645,
+          "cosine_similarity": 0.38685975631653546
+        },
+        {
+          "rank": 4,
+          "chunk_id": 47,
+          "source_file": "pricing_sheet.pdf",
+          "section_heading": "Page 1",
+          "chunk_index": 1,
+          "cosine_distance": 0.6286158485045517,
+          "cosine_similarity": 0.37138415149544834
+        },
+        {
+          "rank": 5,
+          "chunk_id": 28,
+          "source_file": "driver_handbook.md",
+          "section_heading": "3. At the pickup",
+          "chunk_index": 5,
+          "cosine_distance": 0.631633460521698,
+          "cosine_similarity": 0.368366539478302
+        }
+      ],
+      "expected_answer_contains": [
+        "2.00",
+        "120"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "At an airport pickup, once the free waiting time of 10 minutes runs out, you pay Rs. 2.00 per minute, and the total waiting charge is capped at Rs. 120.00.",
+      "confidence": "high",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states the per-minute charge (Rs. 2.00) and the cap (Rs. 120.00) for airport pickup waiting after free time, matching the expected answer requirements.",
+      "abstained": null,
+      "notes": "CHUNKING TRAP. The waiting-charge table straddles the page break in the PDF.",
+      "errors": [],
+      "eval_wall_time_ms": 2195.26
+    },
+    {
+      "id": "p06",
+      "type": "policy",
+      "question": "What is the maximum cancellation rate a driver is allowed before action is taken?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "driver_handbook.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "What is the maximum cancellation rate a driver is allowed before action is taken?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "driver_handbook.md",
+        "refunds_and_cancellations.md",
+        "support_faq.md",
+        "refunds_and_cancellations.md",
+        "refunds_and_cancellations.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 32,
+          "source_file": "driver_handbook.md",
+          "section_heading": "5.3 The threshold",
+          "chunk_index": 9,
+          "cosine_distance": 0.3194444179534912,
+          "cosine_similarity": 0.6805555820465088
+        },
+        {
+          "rank": 2,
+          "chunk_id": 56,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "3. Cancellation by the Driver",
+          "chunk_index": 6,
+          "cosine_distance": 0.478859574862743,
+          "cosine_similarity": 0.521140425137257
+        },
+        {
+          "rank": 3,
+          "chunk_id": 8,
+          "source_file": "support_faq.md",
+          "section_heading": "\"Who cancels more, riders or drivers?\"",
+          "chunk_index": 7,
+          "cosine_distance": 0.4818632448274862,
+          "cosine_similarity": 0.5181367551725138
+        },
+        {
+          "rank": 4,
+          "chunk_id": 53,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.2 The free-cancellation grace period",
+          "chunk_index": 3,
+          "cosine_distance": 0.5089665944000119,
+          "cosine_similarity": 0.4910334055999881
+        },
+        {
+          "rank": 5,
+          "chunk_id": 54,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.3 After the grace period",
+          "chunk_index": 4,
+          "cosine_distance": 0.5100541710853577,
+          "cosine_similarity": 0.48994582891464233
+        }
+      ],
+      "expected_answer_contains": [
+        "8%"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "The maximum cancellation rate a driver is allowed before action is taken is 8%. If a driver's rolling 30-day cancellation rate stays at or below 8% of accepted Rides, no action is taken. Above 8% but below 12% triggers a warning and a coaching call, and above 12% for two consecutive weeks leads to a temporary suspension of 7 days.",
+      "confidence": "high",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly identifies the maximum allowed cancellation rate as 8% and also provides the full escalation ladder (warning/coaching at 8-12%, suspension above 12% for two weeks), matching the expected answer requirements.",
+      "abstained": null,
+      "notes": "Rolling 30-day window. A good answer gives the escalation ladder too.",
+      "errors": [],
+      "eval_wall_time_ms": 2633.37
+    },
+    {
+      "id": "p07",
+      "type": "policy",
+      "question": "How long do I have to contest a no-show charge?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "no_show_policy.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "How long do I have to contest a no-show charge?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "no_show_policy.md",
+        "driver_handbook.md",
+        "support_faq.md",
+        "no_show_policy.md",
+        "no_show_policy.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 43,
+          "source_file": "no_show_policy.md",
+          "section_heading": "4. Contesting a no-show charge",
+          "chunk_index": 4,
+          "cosine_distance": 0.21194217062685283,
+          "cosine_similarity": 0.7880578293731472
+        },
+        {
+          "rank": 2,
+          "chunk_id": 28,
+          "source_file": "driver_handbook.md",
+          "section_heading": "3. At the pickup",
+          "chunk_index": 5,
+          "cosine_distance": 0.5118414745519753,
+          "cosine_similarity": 0.48815852544802474
+        },
+        {
+          "rank": 3,
+          "chunk_id": 4,
+          "source_file": "support_faq.md",
+          "section_heading": "\"What's the no-show fee?\"",
+          "chunk_index": 3,
+          "cosine_distance": 0.5257449402073124,
+          "cosine_similarity": 0.47425505979268756
+        },
+        {
+          "rank": 4,
+          "chunk_id": 42,
+          "source_file": "no_show_policy.md",
+          "section_heading": "3. The charge",
+          "chunk_index": 3,
+          "cosine_distance": 0.5383281066026528,
+          "cosine_similarity": 0.46167189339734716
+        },
+        {
+          "rank": 5,
+          "chunk_id": 40,
+          "source_file": "no_show_policy.md",
+          "section_heading": "1. What a no-show is",
+          "chunk_index": 1,
+          "cosine_distance": 0.5872095369321928,
+          "cosine_similarity": 0.4127904630678072
+        }
+      ],
+      "expected_answer_contains": [
+        "48 hours"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "You have 48 hours to contest a no-show charge.",
+      "confidence": "high",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states the policy duration of 48 hours for contesting a no-show charge, matching the expected content requirement.",
+      "abstained": null,
+      "notes": "",
+      "errors": [],
+      "eval_wall_time_ms": 2134.47
+    },
+    {
+      "id": "p08",
+      "type": "policy",
+      "question": "What percentage of the fare does a driver keep, and when are drivers paid?",
+      "expected_route": "policy",
+      "actual_route": "policy",
+      "route_correct": true,
+      "expected_source": "driver_handbook.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "What percentage of the fare does a driver keep, and when are drivers paid?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "driver_handbook.md",
+        "terms_and_conditions.md",
+        "refunds_and_cancellations.md",
+        "terms_and_conditions.md",
+        "terms_and_conditions.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 36,
+          "source_file": "driver_handbook.md",
+          "section_heading": "8. Payouts",
+          "chunk_index": 13,
+          "cosine_distance": 0.5018702745437622,
+          "cosine_similarity": 0.4981297254562378
+        },
+        {
+          "rank": 2,
+          "chunk_id": 81,
+          "source_file": "terms_and_conditions.md",
+          "section_heading": "5. Fares and payment",
+          "chunk_index": 6,
+          "cosine_distance": 0.5322144031524658,
+          "cosine_similarity": 0.4677855968475342
+        },
+        {
+          "rank": 3,
+          "chunk_id": 54,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.3 After the grace period",
+          "chunk_index": 4,
+          "cosine_distance": 0.5684178173542023,
+          "cosine_similarity": 0.43158218264579773
+        },
+        {
+          "rank": 4,
+          "chunk_id": 85,
+          "source_file": "terms_and_conditions.md",
+          "section_heading": "8. Relationship with Drivers",
+          "chunk_index": 10,
+          "cosine_distance": 0.628347381550383,
+          "cosine_similarity": 0.37165261844961694
+        },
+        {
+          "rank": 5,
+          "chunk_id": 80,
+          "source_file": "terms_and_conditions.md",
+          "section_heading": "4. Booking a Ride",
+          "chunk_index": 5,
+          "cosine_distance": 0.6413076221942902,
+          "cosine_similarity": 0.35869237780570984
+        }
+      ],
+      "expected_answer_contains": [
+        "80%",
+        "weekly"
+      ],
+      "expected_sql_result": null,
+      "system_answer": "Drivers keep 80% of the fare on every completed ride, and earnings are settled weekly, every Tuesday, covering the week ending the previous Sunday. Funds normally reach the registered bank account the same day.",
+      "confidence": "high",
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states that drivers keep 80% of the fare and that earnings are settled weekly (specifically every Tuesday for the week ending the previous Sunday), matching the expected answer requirements.",
+      "abstained": null,
+      "notes": "Tuesday settlement for the week ending the previous Sunday.",
+      "errors": [],
+      "eval_wall_time_ms": 2661.3
+    },
+    {
+      "id": "d01",
+      "type": "data",
+      "question": "How many no-show charges did we apply in September 2026?",
+      "expected_route": "data",
+      "actual_route": "data",
+      "route_correct": true,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [
+        "19"
+      ],
+      "expected_sql_result": 19,
+      "system_answer": "In September 2026, we applied **19** no-show charges.",
+      "confidence": null,
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states that 19 no-show charges were applied in September 2026, matching both the expected answer content and the expected SQL result.",
+      "abstained": null,
+      "notes": "",
+      "errors": [],
+      "eval_wall_time_ms": 2540.4
+    },
+    {
+      "id": "d02",
+      "type": "data",
+      "question": "How many refunds did we issue over the last 90 days, and what did they total?",
+      "expected_route": "data",
+      "actual_route": "data",
+      "route_correct": true,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [
+        "60",
+        "6029"
+      ],
+      "expected_sql_result": 60,
+      "system_answer": "Over the last 90 days, you issued **49 refunds** with a total amount of **$5,027.99**.",
+      "confidence": null,
+      "answer_correct": false,
+      "judge_reason": "The system answer reports 49 refunds totaling $5,027.99, which contradicts the expected SQL result of 60 refunds totaling INR 6,029.00. The expected answer must match the database result of 60 refunds and the total amount of 6029 (or 6,029.00).",
+      "abstained": null,
+      "notes": "Total INR 6,029.00. Accept 6029 or 6,029.00.",
+      "errors": [],
+      "eval_wall_time_ms": 7602.34
+    },
+    {
+      "id": "d03",
+      "type": "data",
+      "question": "Which week had the highest cancellation rate, and what was it?",
+      "expected_route": "data",
+      "actual_route": null,
+      "route_correct": false,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [
+        "29.6",
+        "August"
+      ],
+      "expected_sql_result": "2026-W35",
+      "system_answer": "",
+      "confidence": null,
+      "answer_correct": false,
+      "judge_reason": "No system answer was produced.",
+      "abstained": null,
+      "notes": "Week of Monday 24 August 2026: 50 cancellations out of 169 rides = 29.6%. This is the seeded bad-weather week (22-28 August). A good answer names the week; an excellent one notices the spike is weather-shaped rather than a gradual trend.\n",
+      "errors": [
+        "system_error: ValueError: Only SELECT statements are allowed."
+      ],
+      "eval_wall_time_ms": 2093.58
+    },
+    {
+      "id": "d04",
+      "type": "data",
+      "question": "What is the average fare of a completed ride?",
+      "expected_route": "data",
+      "actual_route": "data",
+      "route_correct": true,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [
+        "223"
+      ],
+      "expected_sql_result": 223.29,
+      "system_answer": "The average fare of a completed ride is **223.29**.",
+      "confidence": null,
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states the average fare of a completed ride as 223.29, which matches the expected SQL result. The expected answer contains '223' as a partial match, and the system answer provides the precise figure from the database.",
+      "abstained": null,
+      "notes": "1,506 completed rides. Filtering on status='completed' is the whole question - cancelled rides carry fare 0 and drag the mean down to ~168 if included.",
+      "errors": [],
+      "eval_wall_time_ms": 2407.74
+    },
+    {
+      "id": "d05",
+      "type": "data",
+      "question": "How many rides did drivers cancel in the last 30 days?",
+      "expected_route": "data",
+      "actual_route": "data",
+      "route_correct": true,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [
+        "48"
+      ],
+      "expected_sql_result": 48,
+      "system_answer": "In the last 30 days, drivers cancelled **20 rides**.",
+      "confidence": null,
+      "answer_correct": false,
+      "judge_reason": "The system answer states 20 rides were cancelled, but the expected SQL result is 48. The answer does not match the expected fact.",
+      "abstained": null,
+      "notes": "",
+      "errors": [],
+      "eval_wall_time_ms": 2556.22
+    },
+    {
+      "id": "d06",
+      "type": "data",
+      "question": "Which pickup locality generates the most rides?",
+      "expected_route": "data",
+      "actual_route": "data",
+      "route_correct": true,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [
+        "Whitefield"
+      ],
+      "expected_sql_result": "Whitefield",
+      "system_answer": "The pickup locality that generates the most rides is **Whitefield**, with a total of **118 rides**.",
+      "confidence": null,
+      "answer_correct": false,
+      "judge_reason": "The system answer incorrectly states that Whitefield has a decisive lead with 118 rides, while the notes indicate that Kalyan Nagar (116) and Jayanagar (115) are close behind, making a 2-ride gap insufficient to claim a decisive lead. The answer overstates the margin of difference.",
+      "abstained": null,
+      "notes": "118 rides. Kalyan Nagar (116) and Jayanagar (115) are close behind - an answer that presents 118 as a decisive lead is overstating a 2-ride gap.",
+      "errors": [],
+      "eval_wall_time_ms": 3178.75
+    },
+    {
+      "id": "h01",
+      "type": "hybrid",
+      "question": "What is our no-show policy, and how many no-show charges did we actually apply in September?",
+      "expected_route": "hybrid",
+      "actual_route": "hybrid",
+      "route_correct": true,
+      "expected_source": "no_show_policy.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "What is our no-show policy?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "no_show_policy.md",
+        "no_show_policy.md",
+        "driver_handbook.md",
+        "no_show_policy.md",
+        "support_faq.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 39,
+          "source_file": "no_show_policy.md",
+          "section_heading": "No-Show Policy",
+          "chunk_index": 0,
+          "cosine_distance": 0.18559575080871582,
+          "cosine_similarity": 0.8144042491912842
+        },
+        {
+          "rank": 2,
+          "chunk_id": 40,
+          "source_file": "no_show_policy.md",
+          "section_heading": "1. What a no-show is",
+          "chunk_index": 1,
+          "cosine_distance": 0.36152855387159744,
+          "cosine_similarity": 0.6384714461284026
+        },
+        {
+          "rank": 3,
+          "chunk_id": 28,
+          "source_file": "driver_handbook.md",
+          "section_heading": "3. At the pickup",
+          "chunk_index": 5,
+          "cosine_distance": 0.47765111923217773,
+          "cosine_similarity": 0.5223488807678223
+        },
+        {
+          "rank": 4,
+          "chunk_id": 42,
+          "source_file": "no_show_policy.md",
+          "section_heading": "3. The charge",
+          "chunk_index": 3,
+          "cosine_distance": 0.5107327997684479,
+          "cosine_similarity": 0.4892672002315521
+        },
+        {
+          "rank": 5,
+          "chunk_id": 4,
+          "source_file": "support_faq.md",
+          "section_heading": "\"What's the no-show fee?\"",
+          "chunk_index": 3,
+          "cosine_distance": 0.5109021955190771,
+          "cosine_similarity": 0.4890978044809229
+        }
+      ],
+      "expected_answer_contains": [
+        "60",
+        "5 minutes",
+        "19"
+      ],
+      "expected_sql_result": 19,
+      "system_answer": "Our no-show policy defines a no-show as when the Driver arrives at the pickup point, waits the full waiting period (5 minutes at a standard pickup, 10 minutes at the airport), is unable to reach the Rider, and ends the Booking without the Rider having boarded. In this case, the Rider is charged a flat no-show fee of ₹60. Of this amount, the Driver receives ₹40 as compensation for traveling to the pickup. The fee is fixed and does not vary based on distance, vehicle type, time of day, or surge multiplier, and waiting charges do not apply in addition to the no-show fee.\n\nIn September, we applied **19** no-show charges.",
+      "confidence": null,
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly states the no-show policy details including the ₹60 fee, the 5-minute waiting period at standard pickups, and explicitly reports 19 no-show charges applied in September, matching both the expected answer contents and the expected SQL result of 19. The answer combines policy evidence from documentation with actual database query results as required for this hybrid question.",
+      "abstained": null,
+      "notes": "The canonical demo question. Must cite the document AND show the query.",
+      "errors": [],
+      "eval_wall_time_ms": 7582.78
+    },
+    {
+      "id": "h02",
+      "type": "hybrid",
+      "question": "Our refunds policy says every refund is issued within 7 days of the ride. Is that what actually happens?",
+      "expected_route": "hybrid",
+      "actual_route": "hybrid",
+      "route_correct": true,
+      "expected_source": "refunds_and_cancellations.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "What is the refunds policy regarding the time taken to issue a refund?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "refunds_and_cancellations.md",
+        "refunds_and_cancellations.md",
+        "refunds_and_cancellations.md",
+        "support_faq.md",
+        "terms_and_conditions.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 60,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "5. Refund timelines",
+          "chunk_index": 10,
+          "cosine_distance": 0.47534769773483276,
+          "cosine_similarity": 0.5246523022651672
+        },
+        {
+          "rank": 2,
+          "chunk_id": 50,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "Refunds & Cancellations Policy",
+          "chunk_index": 0,
+          "cosine_distance": 0.5600866246249263,
+          "cosine_similarity": 0.4399133753750737
+        },
+        {
+          "rank": 3,
+          "chunk_id": 61,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "6. How to request a refund",
+          "chunk_index": 11,
+          "cosine_distance": 0.6554936468601227,
+          "cosine_similarity": 0.3445063531398773
+        },
+        {
+          "rank": 4,
+          "chunk_id": 5,
+          "source_file": "support_faq.md",
+          "section_heading": "\"How long until I get my refund?\"",
+          "chunk_index": 4,
+          "cosine_distance": 0.6581162810325623,
+          "cosine_similarity": 0.34188371896743774
+        },
+        {
+          "rank": 5,
+          "chunk_id": 87,
+          "source_file": "terms_and_conditions.md",
+          "section_heading": "10. Disputes",
+          "chunk_index": 12,
+          "cosine_distance": 0.715120404958725,
+          "cosine_similarity": 0.284879595041275
+        }
+      ],
+      "expected_answer_contains": [
+        "7",
+        "no",
+        "not always"
+      ],
+      "expected_sql_result": 7,
+      "system_answer": "The Cabify-Lite refunds policy states that every approved refund is issued within 7 calendar days of the ride. No refund is issued more than 7 days after the date of the ride. According to the data, 53 refunds were issued within 7 days of the ride, compared to 7 refunds issued after 7 days. This aligns with the policy, showing that the majority of refunds are processed within the specified timeframe.",
+      "confidence": null,
+      "answer_correct": false,
+      "judge_reason": "The system answer incorrectly claims alignment between policy and data, stating 'This aligns with the policy' and 'the majority of refunds are processed within the specified timeframe'. However, the notes explicitly describe a planted contradiction: policy says no refund issued >7 days, but database shows 7 refunds issued 15-38 days later. A correct answer must surface this disagreement, not claim alignment. The answer fails to meet the requirement to present the contradiction.",
+      "abstained": null,
+      "notes": "PLANTED CONTRADICTION. The policy (s.5.1) states no refund is issued more than 7 days after the ride. The database has 7 refunds issued 15-38 days after the ride (refund_ids 12, 21, 22, 26, 45, 47, 59). A passing answer states the policy, states the data, and says they disagree. A failing answer picks one side and presents it as the truth - which is what a system that routes to only one source will do.\n",
+      "errors": [],
+      "eval_wall_time_ms": 7232.54
+    },
+    {
+      "id": "h03",
+      "type": "hybrid",
+      "question": "The support FAQ says drivers cancel more often than riders. Is that true?",
+      "expected_route": "hybrid",
+      "actual_route": "hybrid",
+      "route_correct": true,
+      "expected_source": "support_faq.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "What does the support FAQ say about drivers cancelling more often than riders?",
+      "retrieval_hit": true,
+      "expected_source_rank": 1,
+      "retrieved_sources": [
+        "support_faq.md",
+        "refunds_and_cancellations.md",
+        "driver_handbook.md",
+        "driver_handbook.md",
+        "terms_and_conditions.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 8,
+          "source_file": "support_faq.md",
+          "section_heading": "\"Who cancels more, riders or drivers?\"",
+          "chunk_index": 7,
+          "cosine_distance": 0.18217525429055814,
+          "cosine_similarity": 0.8178247457094419
+        },
+        {
+          "rank": 2,
+          "chunk_id": 56,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "3. Cancellation by the Driver",
+          "chunk_index": 6,
+          "cosine_distance": 0.4481337995449415,
+          "cosine_similarity": 0.5518662004550585
+        },
+        {
+          "rank": 3,
+          "chunk_id": 32,
+          "source_file": "driver_handbook.md",
+          "section_heading": "5.3 The threshold",
+          "chunk_index": 9,
+          "cosine_distance": 0.44868922233581543,
+          "cosine_similarity": 0.5513107776641846
+        },
+        {
+          "rank": 4,
+          "chunk_id": 30,
+          "source_file": "driver_handbook.md",
+          "section_heading": "5.1 When you may cancel",
+          "chunk_index": 7,
+          "cosine_distance": 0.5058257576331036,
+          "cosine_similarity": 0.49417424236689644
+        },
+        {
+          "rank": 5,
+          "chunk_id": 83,
+          "source_file": "terms_and_conditions.md",
+          "section_heading": "6. Cancellations, no-shows and refunds",
+          "chunk_index": 8,
+          "cosine_distance": 0.5258235052718813,
+          "cosine_similarity": 0.47417649472811874
+        }
+      ],
+      "expected_answer_contains": [
+        "no",
+        "riders",
+        "258",
+        "137"
+      ],
+      "expected_sql_result": 258,
+      "system_answer": "### Answer to Your Question\n\nThe support FAQ states that drivers cancel more often than riders, explaining that riders mostly don’t show up rather than cancelling properly, and that most cancellations on the platform are driver-side.\n\nHowever, based on the data:\n\n- **Drivers cancelled 137 times.**\n- **Riders cancelled 258 times.**\n\n**Therefore, it is not true that drivers cancel more often than riders.** The data shows that riders cancelled more often than drivers.",
+      "confidence": null,
+      "answer_correct": true,
+      "judge_reason": "The system answer correctly identifies the contradiction between the support FAQ claim and the actual data. It states the FAQ's position but then provides the concrete data (riders cancelled 258 times vs drivers cancelled 137 times) and concludes that riders actually cancel more often, which aligns with the expected answer requirements and SQL result.",
+      "abstained": null,
+      "notes": "STALE DOCUMENT TRAP. support_faq.md asserts drivers cancel more. The data says the opposite: 258 rider cancellations vs 137 driver cancellations over 90 days. The FAQ even admits it is not a published figure. Correct behaviour is to contradict the document using the data, and to note the FAQ is a support cheat-sheet last updated March 2025, not a policy.\n",
+      "errors": [],
+      "eval_wall_time_ms": 8530.46
+    },
+    {
+      "id": "h04",
+      "type": "hybrid",
+      "question": "What is the cancellation fee, and how much have we collected in no-show fees over the last 90 days?",
+      "expected_route": "hybrid",
+      "actual_route": "hybrid",
+      "route_correct": true,
+      "expected_source": "refunds_and_cancellations.md",
+      "retrieval_applicable": true,
+      "retrieval_question": "What is the cancellation fee?",
+      "retrieval_hit": true,
+      "expected_source_rank": 3,
+      "retrieved_sources": [
+        "driver_handbook.md",
+        "support_faq.md",
+        "refunds_and_cancellations.md",
+        "refunds_and_cancellations.md",
+        "terms_and_conditions.md"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": 33,
+          "source_file": "driver_handbook.md",
+          "section_heading": "5.4 Rider cancellations",
+          "chunk_index": 10,
+          "cosine_distance": 0.49770730761202486,
+          "cosine_similarity": 0.5022926923879751
+        },
+        {
+          "rank": 2,
+          "chunk_id": 2,
+          "source_file": "support_faq.md",
+          "section_heading": "\"Can I cancel for free?\"",
+          "chunk_index": 1,
+          "cosine_distance": 0.5525467529133912,
+          "cosine_similarity": 0.44745324708660883
+        },
+        {
+          "rank": 3,
+          "chunk_id": 55,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.4 Waived cancellation fees",
+          "chunk_index": 5,
+          "cosine_distance": 0.5740502940326395,
+          "cosine_similarity": 0.4259497059673605
+        },
+        {
+          "rank": 4,
+          "chunk_id": 54,
+          "source_file": "refunds_and_cancellations.md",
+          "section_heading": "2.3 After the grace period",
+          "chunk_index": 4,
+          "cosine_distance": 0.6087712580697971,
+          "cosine_similarity": 0.39122874193020285
+        },
+        {
+          "rank": 5,
+          "chunk_id": 83,
+          "source_file": "terms_and_conditions.md",
+          "section_heading": "6. Cancellations, no-shows and refunds",
+          "chunk_index": 8,
+          "cosine_distance": 0.6182341575622532,
+          "cosine_similarity": 0.3817658424377468
+        }
+      ],
+      "expected_answer_contains": [
+        "30",
+        "4080"
+      ],
+      "expected_sql_result": 4080,
+      "system_answer": "The cancellation fee depends on when the Rider cancels:\n\n- Before a Driver accepts: No charge.\n- Within 2 minutes of Driver acceptance: No charge.\n- More than 2 minutes after acceptance, Driver not yet arrived: ₹30.\n- After the Driver has arrived at the pickup point: ₹30 plus any waiting charge accrued.\n- After the journey has commenced: Fare for distance and time travelled, subject to the minimum fare.\n\nAdditionally, Riders receive a 5-minute grace period after the driver accepts before any charges apply. After this, a ₹25 cancellation fee applies. If the Driver had already begun travelling to the pickup, the Driver receives ₹20 of the ₹30 fee charged to the Rider. Cancellation fees may be waived under certain conditions, such as the Driver being more than 10 minutes late, the Driver not moving toward the pickup for 5 consecutive minutes, the vehicle not matching, the Rider canceling at the Driver's request, or severe-weather/civil-disruption advisories.\n\nOver the last 90 days, the total collected in no-show fees is **$3,120.00**.",
+      "confidence": null,
+      "answer_correct": false,
+      "judge_reason": "The system answer incorrectly states the total collected in no-show fees as $3,120.00, while the expected SQL result and notes indicate the correct amount should be ₹4,080 (68 no-shows x ₹60). The answer must surface the contradiction between policy-stated fees and actual collected data, but here it silently uses an incorrect figure.",
+      "abstained": null,
+      "notes": "Rs.30 cancellation fee (policy); 68 no-shows x Rs.60 = Rs.4,080 (data). Two sources, one answer.",
+      "errors": [],
+      "eval_wall_time_ms": 7883.44
+    },
+    {
+      "id": "u01",
+      "type": "unanswerable",
+      "question": "Can I bring my dog in a Cabify-Lite?",
+      "expected_route": null,
+      "actual_route": "policy",
+      "route_correct": null,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [],
+      "expected_sql_result": null,
+      "system_answer": "I don't know based on the provided documents.",
+      "confidence": "low",
+      "answer_correct": true,
+      "judge_reason": "System abstained on an unsupported question.",
+      "abstained": true,
+      "notes": "Nothing in any of the six documents addresses pets or assistance animals. The correct answer is an explicit 'this is not covered in the policy documents I have'. Anything else is a hallucination, and this is the single most important question in the set - a system that invents a confident pet policy will invent a confident refund policy.\n",
+      "errors": [],
+      "eval_wall_time_ms": 1428.13
+    },
+    {
+      "id": "u02",
+      "type": "unanswerable",
+      "question": "How does corporate billing work for business accounts?",
+      "expected_route": null,
+      "actual_route": "policy",
+      "route_correct": null,
+      "expected_source": null,
+      "retrieval_applicable": false,
+      "retrieval_question": null,
+      "retrieval_hit": null,
+      "expected_source_rank": null,
+      "retrieved_sources": [],
+      "retrieved_chunks": [],
+      "expected_answer_contains": [],
+      "expected_sql_result": null,
+      "system_answer": "I don't know based on the provided documents.",
+      "confidence": "low",
+      "answer_correct": true,
+      "judge_reason": "System abstained on an unsupported question.",
+      "abstained": true,
+      "notes": "Not covered. The corpus describes UPI, cards and the wallet only. Watch for the model stitching together clause 5.4 (payment methods) and clause 5.6 (outstanding balances) into a plausible-sounding corporate billing answer. Plausible and sourced are different things.",
+      "errors": [],
+      "eval_wall_time_ms": 1544.95
+    }
+  ]
+}
