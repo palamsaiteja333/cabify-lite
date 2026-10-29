@@ -132,6 +132,8 @@ services:
       - "--config=/etc/otelcol-contrib/config.yaml"
     volumes:
       - ./otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "127.0.0.1:4317:4317"
     networks:
       - cabify-net
 

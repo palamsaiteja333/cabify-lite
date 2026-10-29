@@ -2,6 +2,7 @@ import os
 
 import boto3
 from dotenv import load_dotenv
+from telemetry import tracer
 
 
 # =========================================================
@@ -103,9 +104,29 @@ def generate_text(
     # Call Amazon Nova through Bedrock
     # -----------------------------------------------------
 
-    response = bedrock.converse(
-        **request
-    )
+    with tracer.start_as_current_span("llm_generate") as span:
+        span.set_attribute(
+            "gen_ai.provider.name", "aws.bedrock"
+        )
+        span.set_attribute(
+            "gen_ai.request.model", CHAT_MODEL
+        )
+
+        response = bedrock.converse(**request)
+
+        usage = response.get("usage", {})
+
+        if "inputTokens" in usage:
+            span.set_attribute(
+                "gen_ai.usage.input_tokens",
+                usage["inputTokens"],
+            )
+
+        if "outputTokens" in usage:
+            span.set_attribute(
+                "gen_ai.usage.output_tokens",
+                usage["outputTokens"],
+            )
 
 
     # -----------------------------------------------------

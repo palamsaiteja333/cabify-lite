@@ -4,7 +4,8 @@ import psycopg
 from dotenv import load_dotenv
 from psycopg.rows import dict_row
 
-from embedding_stage import create_embedding
+from embedding_stage import create_embedding, EMBEDDING_MODEL
+from telemetry import tracer
 
 
 # =========================================================
@@ -96,9 +97,19 @@ def retrieve(
     # Step 2: Embed the user question
     # -----------------------------------------------------
 
-    query_embedding = create_embedding(
-        question
-    )
+    with tracer.start_as_current_span("embed_query") as span:
+        span.set_attribute(
+            "gen_ai.provider.name", "aws.bedrock"
+        )
+        span.set_attribute(
+            "gen_ai.request.model", EMBEDDING_MODEL
+        )
+
+        query_embedding = create_embedding(question)
+
+        span.set_attribute(
+            "embedding.dimensions", len(query_embedding)
+        )
 
     # Defensive check:
     # documents and queries must have the same
@@ -118,42 +129,46 @@ def retrieve(
     # Step 3: Search PostgreSQL / pgvector
     # -----------------------------------------------------
 
-    with psycopg.connect(
-        DATABASE_URL,
-        row_factory=dict_row,
-    ) as conn:
+    with tracer.start_as_current_span("retrieve") as span:
+        span.set_attribute("rag.top_k", top_k)
+        span.set_attribute("db.system", "postgresql")
+        with psycopg.connect(
+            DATABASE_URL,
+            row_factory=dict_row,
+        ) as conn:
 
-        with conn.cursor() as cursor:
+            with conn.cursor() as cursor:
 
-            cursor.execute(
-                """
-                SELECT
-                    chunk_id,
-                    source_file,
-                    section_heading,
-                    chunk_index,
-                    content,
+                cursor.execute(
+                    """
+                    SELECT
+                        chunk_id,
+                        source_file,
+                        section_heading,
+                        chunk_index,
+                        content,
 
-                    embedding
+                        embedding
+                            <=> %s::vector
+                            AS cosine_distance
+
+                    FROM doc_chunks
+
+                    ORDER BY
+                        embedding
                         <=> %s::vector
-                        AS cosine_distance
 
-                FROM doc_chunks
+                    LIMIT %s;
+                    """,
+                    (
+                        query_vector,
+                        query_vector,
+                        top_k,
+                    ),
+                )
 
-                ORDER BY
-                    embedding
-                    <=> %s::vector
-
-                LIMIT %s;
-                """,
-                (
-                    query_vector,
-                    query_vector,
-                    top_k,
-                ),
-            )
-
-            rows = cursor.fetchall()
+                rows = cursor.fetchall()
+        span.set_attribute("rag.retrieved_chunks", len(rows))
 
 
     # -----------------------------------------------------

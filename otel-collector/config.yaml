@@ -16,10 +16,6 @@ exporters:
     tls:
       insecure: true
 
-  otlp_http/trace-ingest:
-    endpoint: http://trace-ingest:8001
-    compression: none
-
 service:
   pipelines:
     traces:
@@ -28,4 +24,3 @@ service:
       exporters:
         - debug
         - otlp/tempo
-        - otlp_http/trace-ingest

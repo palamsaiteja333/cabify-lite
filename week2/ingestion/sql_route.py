@@ -9,6 +9,9 @@ from psycopg.rows import dict_row
 from pydantic import BaseModel
 
 from llm_stage import generate_text
+from functools import wraps
+from opentelemetry.trace import Status, StatusCode
+from telemetry import tracer
 
 
 # =========================================================
@@ -455,6 +458,56 @@ def clean_json_output(
 # 6. GENERATE SQL
 # =========================================================
 
+
+def trace_sql_operation(span_name):
+    """Trace SQL operations without logging SQL or results."""
+
+    def decorate(func):
+        @wraps(func)
+        def wrapped(*args, **kwargs):
+            with tracer.start_as_current_span(
+                span_name,
+                record_exception=False,
+                set_status_on_exception=False,
+            ) as span:
+
+                if span_name == "sql_generate":
+                    span.set_attribute(
+                        "gen_ai.provider.name",
+                        "aws.bedrock",
+                    )
+                else:
+                    span.set_attribute(
+                        "db.system", "postgresql"
+                    )
+
+                try:
+                    result = func(*args, **kwargs)
+                except Exception:
+                    span.set_status(
+                        Status(StatusCode.ERROR)
+                    )
+                    raise
+
+                if span_name == "sql_generate":
+                    span.set_attribute(
+                        "sql.generated",
+                        bool(result.sql.strip()),
+                    )
+                else:
+                    span.set_attribute(
+                        "sql.row_count",
+                        len(result),
+                    )
+
+                return result
+
+        return wrapped
+
+    return decorate
+
+
+@trace_sql_operation("sql_generate")
 def generate_sql(
     question: str,
 ) -> SQLGeneration:
@@ -740,6 +793,7 @@ def validate_read_only_sql(
 # 8. EXECUTE SQL
 # =========================================================
 
+@trace_sql_operation("sql_execute")
 def execute_read_only_sql(
     sql: str,
 ) -> list[dict]:

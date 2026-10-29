@@ -1,9 +1,11 @@
 import re
 from typing import Literal
+from functools import wraps
 
 from pydantic import BaseModel
 
 from llm_stage import generate_text
+from telemetry import tracer
 
 
 # =========================================================
@@ -195,6 +197,19 @@ def clean_json_output(
 # 4. CLASSIFY QUESTION
 # =========================================================
 
+
+def trace_classification(func):
+    """Record the chosen route without logging question text."""
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        with tracer.start_as_current_span("classify") as span:
+            decision = func(*args, **kwargs)
+            span.set_attribute("router.route", decision.route)
+            return decision
+    return wrapped
+
+
+@trace_classification
 def classify_question(
     question: str,
 ) -> RouteDecision:

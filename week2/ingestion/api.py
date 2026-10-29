@@ -1,12 +1,17 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from lcel_rag import (
-    answer_question_lcel,
+from routed_chain import (
+    answer_question_routed,
+    RoutedResponse,
 )
 
-from structured_rag import (
-    RAGResponse,
+from telemetry import tracer
+
+from opentelemetry.trace import (
+    SpanKind,
+    Status,
+    StatusCode,
 )
 
 
@@ -71,55 +76,50 @@ def health():
 
 @app.post(
     "/ask",
-    response_model=RAGResponse,
+    response_model=RoutedResponse,
 )
 def ask(
     request: AskRequest,
-) -> RAGResponse:
-    """
-    Grounded RAG endpoint.
+    response: Response,
+) -> RoutedResponse:
+    """Trace and route policy, data and hybrid questions."""
 
-    Flow:
+    with tracer.start_as_current_span(
+        "ask_request",
+        kind=SpanKind.SERVER,
+        record_exception=False,
+        set_status_on_exception=False,
+    ) as span:
 
-        HTTP request
-            ↓
-        validated Pydantic request
-            ↓
-        LCEL RAG chain
-            ↓
-        Titan query embedding
-            ↓
-        pgvector retrieval
-            ↓
-        Nova 2 Lite generation
-            ↓
-        Pydantic output validation
-            ↓
-        structured API response
-    """
+        span.set_attribute("http.request.method", "POST")
+        span.set_attribute("http.route", "/ask")
+        span.set_attribute("rag.top_k", request.top_k)
 
-    try:
+        try:
+            result = answer_question_routed(
+                question=request.question,
+                top_k=request.top_k,
+            )
 
-        return answer_question_lcel(
-            question=request.question,
-            top_k=request.top_k,
+        except ValueError as exc:
+            span.set_status(Status(StatusCode.ERROR))
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc),
+            ) from exc
+
+        except Exception as exc:
+            span.set_status(Status(StatusCode.ERROR))
+            raise HTTPException(
+                status_code=500,
+                detail="Unable to answer the question.",
+            ) from exc
+
+        span.set_attribute("router.route", result.route)
+
+        response.headers["X-Trace-ID"] = format(
+            span.get_span_context().trace_id,
+            "032x",
         )
 
-    except ValueError as exc:
-
-        # Known validation / application error.
-        raise HTTPException(
-            status_code=400,
-            detail=str(exc),
-        ) from exc
-
-    except Exception as exc:
-
-        # Do not expose internal stack traces
-        # through the API response.
-        raise HTTPException(
-            status_code=500,
-            detail=(
-                "Unable to answer the question."
-            ),
-        ) from exc
+        return result
