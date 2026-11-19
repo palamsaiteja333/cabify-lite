@@ -1,3 +1,4 @@
+
 services:
   trace-ingest:
     build:
@@ -67,16 +68,31 @@ services:
     networks:
       - cabify-net
 
+
   rides-api:
     build:
-      context: ./rides-api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.unified
     container_name: cabify-rides-api
+
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      READONLY_DATABASE_URL: ${READONLY_DATABASE_URL_DOCKER:?Docker read-only database URL is required}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+
+      # AWS Bedrock configuration
+      AWS_REGION: us-east-2
+      AWS_PROFILE: ${AWS_PROFILE:-default}
+      AWS_EC2_METADATA_DISABLED: "true"
+
+    # Local development only: use host AWS login
+    volumes:
+      - ${HOME}/.aws:/home/appuser/.aws:ro
+      - ${HOME}/.aws/login/cache:/home/appuser/.aws/login/cache:rw
+
     ports:
       - "8000:8000"
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,7 +140,6 @@ services:
       retries: 5
       start_period: 5s
 
-
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: cabify-otel-collector
@@ -140,7 +155,6 @@ services:
 networks:
   cabify-net:
     name: cabify-net
-
 
 volumes:
   cabify_pgdata:

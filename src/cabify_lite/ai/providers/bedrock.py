@@ -1,0 +1,177 @@
+
+import boto3
+from cabify_lite.core.config import get_settings
+from cabify_lite.observability.tracing import get_tracer
+
+tracer = get_tracer("cabify_lite.ai.providers.bedrock")
+
+
+# =========================================================
+# 1. CONFIGURATION
+# =========================================================
+
+
+AWS_REGION = get_settings().aws_region
+
+# US inference profile for Amazon Nova Micro.
+# CHAT_MODEL = (
+#     "us.amazon.nova-micro-v1:0"
+# )
+CHAT_MODEL = (
+    "us.amazon.nova-2-lite-v1:0"
+)
+
+
+# =========================================================
+# 2. BEDROCK RUNTIME CLIENT
+# =========================================================
+
+bedrock = boto3.client(
+    "bedrock-runtime",
+    region_name=AWS_REGION,
+)
+
+
+# =========================================================
+# 3. GENERATE TEXT
+# =========================================================
+
+def generate_text(
+    prompt: str,
+    system_prompt: str | None = None,
+) -> str:
+    """
+    Generate text using Amazon Nova through
+    the AWS Bedrock Converse API.
+
+    prompt:
+        Dynamic user content such as:
+        - retrieved context
+        - user question
+
+    system_prompt:
+        Stable application-level instructions such as:
+        - grounding rules
+        - citation requirements
+        - abstention behavior
+    """
+
+    # -----------------------------------------------------
+    # Build the Bedrock Converse request
+    # -----------------------------------------------------
+
+    request = {
+        "modelId": CHAT_MODEL,
+
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "text": prompt
+                    }
+                ],
+            }
+        ],
+
+        "inferenceConfig": {
+            # Low temperature for stable enterprise QA.
+            "temperature": 0.0,
+
+            # Maximum number of generated tokens.
+            "maxTokens": 500,
+        },
+    }
+
+
+    # -----------------------------------------------------
+    # Add system instructions when provided
+    # -----------------------------------------------------
+
+    if system_prompt:
+
+        request["system"] = [
+            {
+                "text": system_prompt
+            }
+        ]
+
+
+    # -----------------------------------------------------
+    # Call Amazon Nova through Bedrock
+    # -----------------------------------------------------
+
+    with tracer.start_as_current_span("llm_generate") as span:
+        span.set_attribute(
+            "gen_ai.provider.name", "aws.bedrock"
+        )
+        span.set_attribute(
+            "gen_ai.request.model", CHAT_MODEL
+        )
+
+        response = bedrock.converse(**request)
+
+        usage = response.get("usage", {})
+
+        if "inputTokens" in usage:
+            span.set_attribute(
+                "gen_ai.usage.input_tokens",
+                usage["inputTokens"],
+            )
+
+        if "outputTokens" in usage:
+            span.set_attribute(
+                "gen_ai.usage.output_tokens",
+                usage["outputTokens"],
+            )
+
+
+    # -----------------------------------------------------
+    # Extract generated text from Bedrock response
+    # -----------------------------------------------------
+
+    answer = (
+        response["output"]
+        ["message"]
+        ["content"][0]
+        ["text"]
+    )
+
+    return answer
+
+
+# =========================================================
+# 4. SIMPLE MANUAL TEST
+# =========================================================
+
+if __name__ == "__main__":
+
+    system_prompt = """
+You are a concise technical assistant.
+
+Use only the information supplied in the
+provided context.
+
+Do not invent missing information.
+""".strip()
+
+    prompt = """
+CONTEXT:
+
+RAG means Retrieval-Augmented Generation.
+
+
+QUESTION:
+
+What does RAG mean?
+""".strip()
+
+    answer = generate_text(
+        prompt=prompt,
+        system_prompt=system_prompt,
+    )
+
+    print()
+    print("Nova response:")
+    print()
+    print(answer)

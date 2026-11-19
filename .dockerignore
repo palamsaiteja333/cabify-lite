@@ -1,0 +1,11 @@
+.git
+.venv
+.env
+.env.*
+.aws
+**/__pycache__
+**/*.pyc
+**/*.bak
+week2/evals
+week2/seed
+week2/corpus

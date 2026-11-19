@@ -4,3 +4,8 @@ __pycache__/
 .env
 .DS_Store
 shell-practice/
+
+# Local backups and temporary evaluation runs
+*.bak
+week2/evals/results_unified_compose_smoke*.json
+week2/evals/results_unified_compose_smoke*.md

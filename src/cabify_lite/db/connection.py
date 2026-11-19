@@ -1,0 +1,147 @@
+from cabify_lite.core.config import get_settings
+
+import psycopg
+
+
+DATABASE_URL = get_settings().database_url
+
+
+def get_connection():
+    return psycopg.connect(DATABASE_URL)
+
+
+def init_db():
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS rides (
+                    id SERIAL PRIMARY KEY,
+                    pickup TEXT NOT NULL,
+                    destination TEXT NOT NULL
+                );
+                """
+            )
+
+
+def get_ride_by_id(ride_id: int):
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT ride_id, pickup, dropoff
+                FROM rides
+                WHERE ride_id = %s;
+                """,
+                (ride_id,)
+            )
+
+            row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    return {
+        "id": row[0],
+        "pickup": row[1],
+        "destination": row[2]
+    }
+
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id, pickup, destination
+                FROM rides
+                WHERE id = %s;
+                """,
+                (ride_id,)
+            )
+
+            row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    return {
+        "id": row[0],
+        "pickup": row[1],
+        "destination": row[2]
+    }
+
+def create_ride(pickup: str, destination: str):
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT COALESCE(MAX(ride_id), 0) + 1
+                FROM rides;
+                """
+            )
+
+            ride_id = cursor.fetchone()[0]
+
+            cursor.execute(
+                """
+                INSERT INTO rides (
+                    ride_id,
+                    rider_id,
+                    requested_at,
+                    started_at,
+                    completed_at,
+                    pickup,
+                    dropoff,
+                    fare_amount,
+                    currency,
+                    status
+                )
+                VALUES (
+                    %s,
+                    1,
+                    NOW(),
+                    NOW(),
+                    NOW(),
+                    %s,
+                    %s,
+                    0,
+                    'INR',
+                    'completed'
+                );
+                """,
+                (
+                    ride_id,
+                    pickup,
+                    destination
+                )
+            )
+
+    return {
+        "id": ride_id,
+        "pickup": pickup,
+        "destination": destination
+    }
+
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO rides (pickup, destination)
+                VALUES (%s, %s)
+                RETURNING id;
+                """,
+                (pickup, destination)
+            )
+
+            ride_id = cursor.fetchone()[0]
+
+    return {
+        "id": ride_id,
+        "pickup": pickup,
+        "destination": destination
+    }
+
+def get_ride_count() -> int:
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM rides")
+            return cursor.fetchone()[0]
